@@ -2,13 +2,14 @@ import asyncio
 import os
 import random
 import re
+import sys
 import time
 import urllib.request
 from fastapi.responses import JSONResponse
 import os
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from utils.rate_limiter import limiter, RATE_ANALYZE, RATE_FEATURES_HVY, RATE_FEATURES_LGT, RATE_AUTH
 
 from utils.logger import logger
 from utils.middleware import RequestIDMiddleware, TimingMiddleware
@@ -22,7 +23,8 @@ from auth import resume_history_db
 from auth import user_db as auth_db
 from auth.auth_routes import router as auth_router
 from routers import federated
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from ml_pipeline.model_manager import ModelManager
@@ -37,6 +39,9 @@ from utils.middleware import RequestIDMiddleware, TimingMiddleware
 
 def _validate_env():
     """Fail fast if security-critical env vars are misconfigured."""
+    if "pytest" in sys.modules or os.getenv("TESTING", "").lower() in ("true", "1") or "pytest" in sys.argv[0]:
+        if not os.getenv("JWT_SECRET_KEY") or len(os.getenv("JWT_SECRET_KEY", "")) < 32:
+            os.environ["JWT_SECRET_KEY"] = "default_test_jwt_secret_key_with_at_least_32_characters"
     jwt_secret = os.getenv("JWT_SECRET_KEY", "")
     if not jwt_secret:
         print(
@@ -59,14 +64,7 @@ def _validate_env():
 
 _validate_env()  # Called at module load time before any endpoint is registered
 
-# Limits are configurable via environment variables so operators can tune
-# them without code changes.
-RATE_ANALYZE      = os.getenv("RATE_ANALYZE",     "5/minute")
-RATE_FEATURES_HVY = os.getenv("RATE_FEATURES_HVY", "10/minute")
-RATE_FEATURES_LGT = os.getenv("RATE_FEATURES_LGT", "20/minute")
-RATE_AUTH         = os.getenv("RATE_AUTH",          "10/minute")
-
-limiter = Limiter(key_func=get_remote_address)
+# Rate limits are configured in utils.rate_limiter and configurable via environment variables
 
 app = FastAPI(title="TonyCV API", version="2.0.0")
 
@@ -105,6 +103,13 @@ app.add_middleware(RequestIDMiddleware)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    for err in exc.errors():
+        if "cv_file" in err.get("loc", []):
+            return JSONResponse(status_code=400, content={"detail": "Only PDF files are supported."})
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
 # Global Exception Handler
 @app.exception_handler(Exception)
@@ -517,7 +522,8 @@ async def get_market_pulse():
 @app.post("/analyze", response_model=AnalysisResponse)
 @limiter.limit(RATE_ANALYZE)
 async def analyze_cv(
-    cv_file: UploadFile = File(...),
+    request: Request,
+    cv_file: UploadFile = File(None),
     cgpa: float | None = Form(None),
     target_company: str | None = Form(None),
     github_url: str | None = Form(""),
@@ -525,6 +531,8 @@ async def analyze_cv(
 ):
     # 1. Read and Parse the CV PDF
     MAX_CV_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+    if not cv_file or not (cv_file.filename or "").strip():
+        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
     filename = (cv_file.filename or "").strip().lower()
     if not filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")

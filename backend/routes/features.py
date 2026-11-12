@@ -1,34 +1,25 @@
 import math
 import random
 import re
-import math
-from main import limiter, RATE_FEATURES_HVY, RATE_FEATURES_LGT
+from typing import Any
+from fastapi import APIRouter, HTTPException, Request
 from ml_pipeline.semantic_matcher import semantic_skill_match
+from ml_pipeline.section_completeness import analyze_section_completeness
+from ml_pipeline.keyword_density import analyze_keyword_density
+from ml_pipeline.readability_analyzer import analyze_readability
+from ml_pipeline.language_detector import detect_resume_language
+from ml_pipeline.industry_evaluator import evaluate_industry_fit
+from ml_pipeline.benchmarking import compute_benchmark_comparison
+from ml_pipeline.soft_skills import extract_soft_skills
+from ml_pipeline.recruiter_summary import generate_recruiter_summary
+from ml_pipeline.quality_checklist import evaluate_quality_checklist
+from ml_pipeline.linkedin_comparator import compare_resume_with_linkedin
 from pydantic import BaseModel, Field
+from utils.rate_limiter import limiter, RATE_FEATURES_HVY, RATE_FEATURES_LGT
 
 router = APIRouter(prefix="/features", tags=["Enhancement Features"])
 
 # ─── PYDANTIC MODELS ───
-
-@router.post("/rewrite")
-@limiter.limit(RATE_FEATURES_HVY)
-async def rewrite(request: Request, ...):
-    ...
-
-@router.post("/ats-score")
-@limiter.limit(RATE_FEATURES_HVY)
-async def ats_score(request: Request, ...):
-    ...
-
-@router.post("/salary-predict")
-@limiter.limit(RATE_FEATURES_LGT)
-async def salary_predict(request: Request, ...):
-    ...
-
-@router.post("/jd-match")
-@limiter.limit(RATE_FEATURES_LGT)
-async def jd_match(request: Request, ...):
-    ...
 
 
 class RewriteRequest(BaseModel):
@@ -784,3 +775,101 @@ async def get_user_analytics():
         ],
         "applications_status": {"applied": 14, "interviews": 4, "offers": 2},
     }
+
+
+# ─── 15. SECTION COMPLETENESS ANALYSIS (Issue #56) ───
+class SectionCompletenessRequest(BaseModel):
+    cv_text: str
+
+@router.post("/section-completeness")
+async def get_section_completeness(req: SectionCompletenessRequest):
+    return analyze_section_completeness(req.cv_text)
+
+
+# ─── 16. KEYWORD DENSITY ANALYSIS (Issue #60) ───
+class KeywordDensityRequest(BaseModel):
+    cv_text: str
+    target_role: str = ""
+
+@router.post("/keyword-density")
+async def get_keyword_density(req: KeywordDensityRequest):
+    return analyze_keyword_density(req.cv_text, req.target_role)
+
+
+# ─── 17. MULTI-LANGUAGE RESUME SUPPORT (Issue #61) ───
+class LanguageDetectRequest(BaseModel):
+    cv_text: str
+
+@router.post("/language-detect")
+async def get_language_detection(req: LanguageDetectRequest):
+    return detect_resume_language(req.cv_text)
+
+
+# ─── 18. RESUME READABILITY SCORE (Issue #64) ───
+class ReadabilityRequest(BaseModel):
+    cv_text: str
+
+@router.post("/readability")
+async def get_readability_analysis(req: ReadabilityRequest):
+    return analyze_readability(req.cv_text)
+
+
+# ─── 19. INDUSTRY-SPECIFIC RESUME EVALUATION (Issue #66) ───
+class IndustryEvalRequest(BaseModel):
+    cv_text: str
+    industry_key: str = "tech"
+
+@router.post("/industry-eval")
+async def get_industry_evaluation(req: IndustryEvalRequest):
+    return evaluate_industry_fit(req.cv_text, req.industry_key)
+
+
+# ─── 20. BENCHMARK COMPARISON (Issue #67) ───
+class BenchmarkRequest(BaseModel):
+    cv_text: str
+    role: str = "software engineer"
+    skills: list[str] | None = None
+
+@router.post("/benchmark")
+async def get_benchmark_comparison(req: BenchmarkRequest):
+    return compute_benchmark_comparison(req.cv_text, req.skills, req.role)
+
+
+# ─── 21. SOFT SKILLS IDENTIFICATION (Issue #68) ───
+class SoftSkillsRequest(BaseModel):
+    cv_text: str
+
+@router.post("/soft-skills")
+async def get_soft_skills(req: SoftSkillsRequest):
+    return extract_soft_skills(req.cv_text)
+
+
+# ─── 22. RECRUITER-FRIENDLY SUMMARY (Issue #70) ───
+class RecruiterSummaryRequest(BaseModel):
+    cv_text: str
+    candidate_name: str = ""
+    target_role: str = ""
+
+@router.post("/recruiter-summary")
+async def get_recruiter_summary(req: RecruiterSummaryRequest):
+    return generate_recruiter_summary(req.cv_text, req.candidate_name, req.target_role)
+
+
+# ─── 23. RESUME QUALITY CHECKLIST (Issue #71) ───
+class QualityChecklistRequest(BaseModel):
+    cv_text: str
+
+@router.post("/quality-checklist")
+async def get_quality_checklist(req: QualityChecklistRequest):
+    return evaluate_quality_checklist(req.cv_text)
+
+
+# ─── 24. LINKEDIN PROFILE COMPARISON (Issue #72) ───
+class LinkedinCompareRequest(BaseModel):
+    cv_text: str
+    linkedin_text: str
+
+@router.post("/linkedin-compare")
+async def get_linkedin_comparison(req: LinkedinCompareRequest):
+    return compare_resume_with_linkedin(req.cv_text, req.linkedin_text)
+

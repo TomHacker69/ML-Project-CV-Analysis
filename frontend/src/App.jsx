@@ -25,6 +25,7 @@ import SalaryPredictPage from './pages/SalaryPredictPage';
 import SkillGapPage from './pages/SkillGapPage';
 import PortfolioAnalyzerPage from './pages/PortfolioAnalyzerPage';
 import ResumeHistoryPage from './pages/ResumeHistoryPage';
+import CVAnalysisSuitePage from './pages/CVAnalysisSuitePage';
 import api from './services/api';
 
 /* ── Scroll-to-top on route change ── */
@@ -216,6 +217,7 @@ function Navbar({ user, onLogout, onOpenRegister }) {
   }, [location.pathname]);
 
   const resumeDropItems = [
+    { label: 'Intelligence Suite', to: '/analysis-suite', icon: '⚡' },
     { label: 'Resume Builder', to: '/resume-builder', icon: '🛠️' },
     { label: 'Upload & Analyse', to: '/analyze', icon: '📊' },
     { label: 'Version History', to: '/resume-history', icon: 'V' },
@@ -230,6 +232,7 @@ function Navbar({ user, onLogout, onOpenRegister }) {
   ];
 
   const careerDropItems = [
+    { label: 'CV Intelligence Suite', to: '/analysis-suite', icon: '⚡' },
     { label: 'Career Roadmap', to: '/career-roadmap', icon: '🗺️' },
     { label: 'Skill Gap Analysis', to: '/skill-gap', icon: '📈' },
     { label: 'Portfolio Analyzer', to: '/portfolio-analyzer', icon: '🌐' },
@@ -472,6 +475,8 @@ function App() {
           <Route path="/skill-gap" element={<SkillGapPage />} />
           <Route path="/portfolio-analyzer" element={<PortfolioAnalyzerPage />} />
           <Route path="/resume-history" element={<ResumeHistoryPage />} />
+          <Route path="/analysis-suite" element={<CVAnalysisSuitePage />} />
+          <Route path="/audit" element={<CVAnalysisSuitePage />} />
           {/* Catch-all → Home */}
           <Route path="*" element={<Home />} />
         </Routes>
