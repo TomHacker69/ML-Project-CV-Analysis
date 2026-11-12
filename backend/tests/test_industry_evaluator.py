@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ml_pipeline.industry_evaluator import evaluate_industry_fit
 
 SAMPLE_RESUME = """Jane Doe

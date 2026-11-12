@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ml_pipeline.keyword_density import analyze_keyword_density
 
 def test_keyword_density_analysis():

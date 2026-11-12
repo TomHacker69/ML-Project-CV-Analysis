@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ml_pipeline.quality_checklist import evaluate_quality_checklist
 
 SAMPLE_RESUME = """Jane Doe

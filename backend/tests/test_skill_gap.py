@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ml_pipeline.skill_gap import compute_skill_gap
 
 def test_skill_gap_computation():

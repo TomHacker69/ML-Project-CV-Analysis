@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ml_pipeline.section_completeness import analyze_section_completeness
 
 SAMPLE_RESUME = """Jane Doe

@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ml_pipeline.recruiter_summary import generate_recruiter_summary
 
 SAMPLE_RESUME = """Jane Doe
