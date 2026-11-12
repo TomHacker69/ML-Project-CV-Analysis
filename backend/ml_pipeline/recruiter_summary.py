@@ -94,3 +94,4 @@ Elevator Pitch:
         "elevator_pitch": elevator_pitch,
         "formatted_copy_text": formatted_copy_text.strip(),
     }
+

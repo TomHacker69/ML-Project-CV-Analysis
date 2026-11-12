@@ -97,3 +97,4 @@ def compare_resume_with_linkedin(cv_text: str, linkedin_text: str) -> Dict[str, 
         "total_discrepancies": len(inconsistencies),
         "status": "Consistent" if consistency_score >= 80 else ("Moderate Variance" if consistency_score >= 60 else "High Discrepancy")
     }
+

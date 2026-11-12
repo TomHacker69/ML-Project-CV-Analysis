@@ -124,3 +124,4 @@ def compute_benchmark_comparison(cv_text: str, candidate_skills: List[str] = Non
         "metrics": metrics_comparison,
         "insights": insights,
     }
+

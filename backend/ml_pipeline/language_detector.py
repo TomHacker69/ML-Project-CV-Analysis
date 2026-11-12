@@ -86,3 +86,4 @@ def detect_resume_language(cv_text: str) -> Dict[str, Any]:
         "requires_translation_for_global_ats": not is_english,
         "recommendations": recommendations,
     }
+

@@ -119,3 +119,4 @@ def analyze_readability(cv_text: str) -> Dict[str, Any]:
         "bullet_consistency": bullet_status,
         "recommendations": recommendations,
     }
+

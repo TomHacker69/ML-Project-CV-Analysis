@@ -162,3 +162,4 @@ def evaluate_industry_fit(cv_text: str, industry_key: str = "tech") -> Dict[str,
             {"key": k, "title": v["title"]} for k, v in INDUSTRY_PROFILES.items()
         ]
     }
+

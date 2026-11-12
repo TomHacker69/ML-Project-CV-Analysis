@@ -147,3 +147,4 @@ def test_linkedin_comparison():
     assert "consistency_score" in data
     assert len(data["matched_skills"]) >= 3
     assert "inconsistencies" in data
+

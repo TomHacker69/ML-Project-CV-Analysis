@@ -180,3 +180,4 @@ export default function LinkedInComparison({ cvText }) {
     </div>
   );
 }
+

@@ -108,3 +108,4 @@ def analyze_keyword_density(cv_text: str, target_role: str = "") -> Dict[str, An
         "density_score": density_score,
         "recommendations": recommendations,
     }
+

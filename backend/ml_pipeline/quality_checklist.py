@@ -115,3 +115,4 @@ def evaluate_quality_checklist(cv_text: str) -> Dict[str, Any]:
         "categories": categories,
         "action_items": action_items[:6],
     }
+
